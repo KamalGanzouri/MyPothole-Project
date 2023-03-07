@@ -6,7 +6,7 @@ from fastapi import FastAPI, UploadFile, HTTPException
 
 from ultralytics import YOLO
 
-model = YOLO("Model.pt")
+model = YOLO('Model.pt')
 
 app = FastAPI()
 
@@ -16,7 +16,7 @@ async def root():
     return {"message": "Hello World"}
 
 
-@app.get("/detect")
+@app.post("/detect")
 async def detect(img: UploadFile):
     massage = ""
     if img.filename.split(".")[-1] in ("jpg", "jpeg", "png"):
