@@ -28,13 +28,13 @@ async def detect(img: UploadFile, lat: float, long: float):
     user_id = "id"
     location = firestore.GeoPoint(lat, long)
     admin_id = "id"
-    if img.filename.split(".")[-1] in ("jpg", "jpeg", "png"):
+    '''if img.filename.split(".")[-1] in ("jpg", "jpeg", "png"):
         pass
     else:
-        raise HTTPException(status_code=415, detail="wrong format")
-    image = Image.open(BytesIO(img.file.read()))
-    image = np.array(image)
-    result = model(image)
+        raise HTTPException(status_code=415, detail="wrong format")'''
+    '''image = Image.open(BytesIO(img.file.read()))
+    image = np.array(image)'''
+    result = model(img)
     pothole_type = ""
     for r in result:
         for c in r.boxes.cls:
