@@ -1,13 +1,11 @@
 from io import BytesIO
 
+import firebase_admin
 import numpy as np
 from PIL import Image
-from fastapi import FastAPI, UploadFile, HTTPException
-
-from ultralytics import YOLO
-
-import firebase_admin
+from fastapi import FastAPI, UploadFile
 from firebase_admin import credentials, firestore
+from ultralytics import YOLO
 
 cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
@@ -32,7 +30,8 @@ async def detect(img: UploadFile, lat: float, long: float):
         pass
     else:
         raise HTTPException(status_code=415, detail="wrong format")'''
-    image = np.array(BytesIO(img.file.read()))
+    image = Image.open(BytesIO(img.file.read()))
+    image = np.array(image)
     result = model(image)
     pothole_type = ""
     for r in result:
