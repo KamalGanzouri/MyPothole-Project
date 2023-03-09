@@ -32,8 +32,7 @@ async def detect(img: UploadFile, lat: float, long: float):
         pass
     else:
         raise HTTPException(status_code=415, detail="wrong format")'''
-    image = Image.open(BytesIO(img.file.read()))
-    image = np.array(image)
+    image = np.array(BytesIO(img.file.read()))
     result = model(image)
     pothole_type = ""
     for r in result:
