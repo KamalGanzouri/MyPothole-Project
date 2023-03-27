@@ -1,7 +1,4 @@
-from io import BytesIO
-
 import numpy as np
-from PIL import Image
 from fastapi import FastAPI, UploadFile, HTTPException
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -34,7 +31,7 @@ async def detect(img: UploadFile, lat: float, long: float):
     else:
         raise HTTPException(status_code=415, detail="wrong format")
 
-    image = BytesIO(img.file.read())
+    image = img.file.read()
     image = np.array(image)
     result = model(image)
 
