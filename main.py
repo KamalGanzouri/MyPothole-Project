@@ -2,7 +2,7 @@ from io import BytesIO
 
 import numpy as np
 from PIL import Image
-from fastapi import FastAPI, UploadFile, HTTPException
+from fastapi import FastAPI, File
 import firebase_admin
 from firebase_admin import credentials, firestore
 from ultralytics import YOLO
@@ -22,7 +22,7 @@ async def root():
 
 
 @app.post("/detect")
-async def detect(img: bytes, lat: float, long: float):
+async def detect(lat: float, long: float, img: bytes = File(...)):
 
     location = firestore.GeoPoint(lat, long)
     docs = database.collection('pothole').where("location", "==", location).get()
@@ -33,9 +33,10 @@ async def detect(img: bytes, lat: float, long: float):
         pass
     else:
         raise HTTPException(status_code=415, detail="wrong format")'''
-    image = Image.open(BytesIO(img))
-    image = np.array(image)
-    result = model(image)
+    with BytesIO(img) as f:
+        image = Image.open(f)
+        img_array = np.array(image)
+    result = model(img_array)
 
     pothole_type = ""
 
