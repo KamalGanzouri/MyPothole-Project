@@ -22,7 +22,7 @@ async def root():
 
 
 @app.post("/detect")
-async def detect(img: np.array(), lat: float, long: float):
+async def detect(img: [], lat: float, long: float):
 
     location = firestore.GeoPoint(lat, long)
     docs = database.collection('pothole').where("location", "==", location).get()
@@ -35,8 +35,8 @@ async def detect(img: np.array(), lat: float, long: float):
         raise HTTPException(status_code=415, detail="wrong format")
 
     #image = Image.open(BytesIO(img.file.read()))
-    #image = np.array(img)
-    result = model(img)
+    image = np.array(img)
+    result = model(image)
 
     pothole_type = ""
 
