@@ -29,10 +29,10 @@ async def detect(img: UploadFile, lat: float, long: float):
     if docs:
         return "Already Saved"
 
-    if img.filename.split(".")[-1] in ("jpg", "jpeg", "png"):
+    '''if img.filename.split(".")[-1] in ("jpg", "jpeg", "png"):
         pass
     else:
-        raise HTTPException(status_code=415, detail="wrong format")
+        raise HTTPException(status_code=415, detail="wrong format")'''
 
     image = Image.open(BytesIO(img.file.read()))
     image = np.array(image)
