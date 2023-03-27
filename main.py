@@ -33,7 +33,6 @@ async def detect(img: bytes, lat: float, long: float):
         pass
     else:
         raise HTTPException(status_code=415, detail="wrong format")'''
-
     image = Image.open(BytesIO(img))
     image = np.array(image)
     result = model(image)
