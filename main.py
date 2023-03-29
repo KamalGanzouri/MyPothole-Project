@@ -4,7 +4,7 @@ from PIL import Image
 from fastapi import FastAPI, File
 import firebase_admin
 from firebase_admin import credentials, firestore
-from ultralyticsplus import YOLO
+from ultralytics import YOLO
 
 cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
@@ -72,9 +72,11 @@ async def locations():
     docs = database.collection('pothole').where("fixed", "==", False).stream()
     location = []
     for doc in docs:
+        id = doc.id
         doc = doc.to_dict()
 
-        location_and_type = {'latitude': doc.get('location').latitude, 'longitude': doc.get('location').longitude,
+        location_and_type = {'id': id, 'latitude': doc.get('location').latitude,
+                             'longitude': doc.get('location').longitude,
                              'type': doc.get('type')}
         location.append(location_and_type)
     return location
@@ -85,8 +87,10 @@ async def bad_locations():
     docs = database.collection("pothole").where("fixed", "==", False).where("type", "==", "Bad").stream()
     location = []
     for doc in docs:
+        id = doc.id
         doc = doc.to_dict()
-        location_only = {'latitude': doc.get('location').latitude, 'longitude': doc.get('location').longitude}
+        location_only = {'id': id, 'latitude': doc.get('location').latitude,
+                         'longitude': doc.get('location').longitude}
         location.append(location_only)
     return location
 
@@ -96,8 +100,10 @@ async def dangerous_locations():
     docs = database.collection("pothole").where("fixed", "==", False).where("type", "==", "Dangerous").stream()
     location = []
     for doc in docs:
+        id = doc.id
         doc = doc.to_dict()
-        location_only = {'latitude': doc.get('location').latitude, 'longitude': doc.get('location').longitude}
+        location_only = {'id': id, 'latitude': doc.get('location').latitude,
+                         'longitude': doc.get('location').longitude}
         location.append(location_only)
     return location
 
