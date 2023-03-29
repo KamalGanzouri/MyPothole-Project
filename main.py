@@ -1,57 +1,70 @@
 from io import BytesIO
-
 import numpy as np
 from PIL import Image
 from fastapi import FastAPI, File
 import firebase_admin
 from firebase_admin import credentials, firestore
-from ultralytics import YOLO
+from ultralyticsplus import YOLO
 
 cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
 database = firestore.client()
 
 model = YOLO('Model.pt')
+model.overrides['conf'] = 0.8
 
 app = FastAPI()
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+@app.post("/login")
+async def login(email: str, password: str):
+    docs = database.collection("user").where("email", "==", email).where("password", "==", password)\
+                                      .where("type", "==", 'user').get()
+    if docs:
+        for doc in docs:
+            return {'id': doc.id, 'type': 'user'}
+    docs = database.collection("user").where("email", "==", email).where("password", "==", password)\
+                                      .where("type", "==", 'employee').get()
+    if docs:
+        for doc in docs:
+            return {'id': doc.id, 'type': 'employee'}
+
+    return "Failed"
+
+
+@app.post("/signup")
+async def signup(email: str, password: str, category: str):
+    docs = database.collection('user').where("email", "==", email).get()
+    if docs:
+        return "Already Saved"
+    else:
+        database.collection('user').add({'email': email, 'password': password, 'type': category})
+    return "Success"
 
 
 @app.post("/detect")
 async def detect(lat: float, long: float, img: bytes = File(...)):
-
+    pothole_type = "No Detection"
     location = firestore.GeoPoint(lat, long)
+
     docs = database.collection('pothole').where("location", "==", location).get()
     if docs:
         return "Already Saved"
-
-    '''if img.filename.split(".")[-1] in ("jpg", "jpeg", "png"):
-        pass
     else:
-        raise HTTPException(status_code=415, detail="wrong format")'''
-    with BytesIO(img) as f:
-        image = Image.open(f)
-        img_array = np.array(image)
-    result = model(img_array)
+        image = Image.open(BytesIO(img))
+        image = np.array(image)
+        result = model(image)
 
-    pothole_type = ""
+        for r in result:
+            for c in r.boxes.cls:
+                pothole_type = model.names[int(c)]
+                if pothole_type == "Dangerous":
+                    break
 
-    for r in result:
-        for c in r.boxes.cls:
-            pothole_type = model.names[int(c)]
-            if pothole_type == "Dangerous":
-                break
-
-    if pothole_type in ("Bad", "Dangerous"):
-        database.collection('pothole').add({'user_id': "NotDefinedYet", 'type': pothole_type, 'location': location,
-                                            'fixed': False, 'employee_id': "NotDefinedYet"})
-        return 'Detected'
-    else:
-        return 'No Detection'
+        if pothole_type in ("Bad", "Dangerous"):
+            database.collection('pothole').add({'user_id': "NotDefinedYet", 'type': pothole_type, 'location': location,
+                                                'fixed': False, 'employee_id': "NotDefinedYet"})
+    return pothole_type
 
 
 @app.get("/location")
@@ -89,7 +102,7 @@ async def dangerous_locations():
     return location
 
 
-@app.put("/pothole-fixed")
+@app.put("/location/fixed")
 async def pothole_fix(lat: float, long: float, employee_id: str):
     location = firestore.GeoPoint(lat, long)
     docs = database.collection('pothole').where("location", "==", location).get()
