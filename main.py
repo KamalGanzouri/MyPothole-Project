@@ -45,7 +45,7 @@ async def signup(email: str, password: str, category: str):
 @app.post("/detect")
 async def detect(lat: float, long: float, img: bytes = File(...)):
     pothole_type = "No Detection"
-    location = firestore.GeoPoint('%.4f' % lat, '%.4f' % long)
+    location = firestore.GeoPoint(float('%.4f' % lat), float('%.4f' % long))
 
     docs = database.collection('pothole').where("location", "==", location).get()
     if docs:
