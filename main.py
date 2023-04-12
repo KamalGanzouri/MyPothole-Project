@@ -43,7 +43,7 @@ async def signup(email: str, password: str, category: str):
 
 
 @app.post("/detect")
-async def detect(lat: float, long: float, img: bytes = File(...)):
+async def detect(lat: float, long: float, user_id: str, img: bytes = File(...)):
     pothole_type = "No Detection"
     location = firestore.GeoPoint(float('%.4f' % lat), float('%.4f' % long))
 
@@ -62,7 +62,7 @@ async def detect(lat: float, long: float, img: bytes = File(...)):
                     break
 
         if pothole_type in ("Bad", "Dangerous"):
-            database.collection('pothole').add({'user_id': "NotDefinedYet", 'type': pothole_type, 'location': location,
+            database.collection('pothole').add({'user_id': user_id, 'type': pothole_type, 'location': location,
                                                 'fixed': False, 'employee_id': "NotDefinedYet"})
     return pothole_type
 
