@@ -11,7 +11,6 @@ firebase_admin.initialize_app(cred)
 database = firestore.client()
 
 model = YOLO('Model.pt')
-model.overrides['conf'] = 0.8
 
 app = FastAPI()
 
@@ -53,7 +52,7 @@ async def detect(lat: float, long: float, user_id: str, img: bytes = File(...)):
     else:
         image = Image.open(BytesIO(img))
         image = np.array(image)
-        result = model(image)
+        result = model(image, conf=0.5)
 
         for r in result:
             for c in r.boxes.cls:
