@@ -46,7 +46,7 @@ async def detect(lat: float, long: float, user_id: str, img: bytes = File(...)):
     pothole_type = "No Detection"
     location = firestore.GeoPoint(float('%.4f' % lat), float('%.4f' % long))
 
-    docs = database.collection('pothole').where("location", "==", location).get()
+    docs = database.collection('pothole').where("location", "==", location).where("fixed", "==", False).get()
     if docs:
         return "Already Saved"
     else:
