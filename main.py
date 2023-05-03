@@ -108,9 +108,6 @@ async def dangerous_locations():
 
 
 @app.put("/location/fixed")
-async def pothole_fix(lat: float, long: float, employee_id: str):
-    location = firestore.GeoPoint(lat, long)
-    docs = database.collection('pothole').where("location", "==", location).get()
-    for doc in docs:
-        database.collection('pothole').document(doc.id).update({'fixed': True, 'employee_id': employee_id})
+async def pothole_fix(id: str, employee_id: str):
+    database.collection('pothole').document(id).update({'fixed': True, 'employee_id': employee_id})
     return "Pothole marked as fixed"
